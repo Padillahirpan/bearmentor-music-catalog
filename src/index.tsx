@@ -8,29 +8,7 @@ export default new OpenAPIHono({ strict: false })
     console.log(`Request: ${c.req.method} ${c.req.url}`);
     await next();
   })
-  .get("/tracks", async (c) => {
-    const track_list = await getTracks();
-    return c.json(track_list);
-  })
-  .get("/tracks/:id", async (c) => {
-    const id = Number(c.req.param("id"));
-
-    console.log("this is data track: ", id);
-    if (!id) return c.json({ message: "There is no track ID" });
-
-    const track = await getTrackById(id);
-
-    console.log("this is data track 2: ", track);
-
-    if (!track) {
-      c.status(400);
-      return c.json({
-        message: "Track no found!",
-      });
-    }
-
-    return c.json(track);
-  })
+  .route("api/tracks", trackRoute)
   .get("/", (c) => {
     return c.html(
       <html lang="en">
