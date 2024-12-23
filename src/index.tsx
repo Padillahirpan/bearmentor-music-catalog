@@ -2,13 +2,16 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { getTrackById, getTracks } from "./tracks/service";
 import { WelcomePage } from "./welcome";
 import { trackRoute } from "./tracks/route";
+import { artistRoute } from "./artists/route";
 
 export default new OpenAPIHono({ strict: false })
   .use("*", async (c, next) => {
     console.log(`Request: ${c.req.method} ${c.req.url}`);
     await next();
   })
+  .route("api/artists", artistRoute)
   .route("api/tracks", trackRoute)
+
   .get("/", (c) => {
     return c.html(
       <html lang="en">

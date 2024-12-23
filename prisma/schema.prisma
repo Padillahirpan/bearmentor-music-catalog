@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Artist {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(70)
+  bio        String?
+  image      String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  Album      Album[]
+
+  @@map("artists")
+}
+
+model Album {
+  id           Int       @id @default(autoincrement())
+  title        String    @db.VarChar(100)
+  release_date DateTime?
+  cover_art    String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  artist_id    Int
+  artist       Artist    @relation(fields: [artist_id], references: [id])
+  Track        Track[]
+
+  @@map("albums")
+}
+
+model Track {
+  id            Int             @id @default(autoincrement())
+  title         String          @db.VarChar(100)
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  album_id      Int
+  album         Album           @relation(fields: [album_id], references: [id])
+  PlaylistTrack PlaylistTrack[]
+
+  @@map("tracks")
+}
+
+model Playlist {
+  id            Int             @id @default(autoincrement()) // Auto-incrementing primary key
+  title         String          @db.VarChar(255) // Title of the playlist
+  createdAt     DateTime        @default(now()) // Timestamp for creation
+  updatedAt     DateTime        @updatedAt // Timestamp for last update
+  description   String?         @db.Text // Optional description
+  PlaylistTrack PlaylistTrack[]
+
+  @@map("playlists")
+}
+
+model PlaylistTrack {
+  playlistId  Int // Foreign key to Playlist
+  trackId     Int // Foreign key to Track
+  name        String   @db.VarChar(255) // Name of the track in the playlist
+  description String?  @db.Text // Optional description
+  createdAt   DateTime @default(now()) // Timestamp for creation
+  updatedAt   DateTime @updatedAt // Timestamp for last update
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade) // Relation to Playlist
+  track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade) // Relation to Track
+
+  @@id([playlistId, trackId]) // Composite primary key
+  @@map("playlisttracks")
+}
