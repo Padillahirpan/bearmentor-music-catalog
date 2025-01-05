@@ -3,6 +3,7 @@ import { WelcomePage } from "./welcome";
 import { trackRoute } from "./tracks/route";
 import { artistRoute } from "./artists/route";
 import { albumRoute } from "./albums/route";
+import { playlistRoute } from "./playlist/route";
 
 export default new OpenAPIHono({ strict: false })
   .use("*", async (c, next) => {
@@ -12,6 +13,7 @@ export default new OpenAPIHono({ strict: false })
   .route("api/artists", artistRoute)
   .route("api/tracks", trackRoute)
   .route("api/albums", albumRoute)
+  .route("api/playlists", playlistRoute)
   .get("/", (c) => {
     return c.html(
       <html lang="en">
