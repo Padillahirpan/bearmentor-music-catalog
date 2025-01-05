@@ -4,36 +4,34 @@ import { ArtistRequestSchema, NewArtistRequestSchema, validateArtist } from "./s
 
 const prisma = new PrismaClient();
 
-export interface Artist {
-   id: number,
-   name: string,
-   createdAt: string,
-   updatedAt: string,
-   bio: string,
-   image: string,
+
+export async function seedArtists() {
+   const artists = await prisma.artist.createMany({
+      data: [
+         { id: 1, name: "Sheila On 7", bio: "A fresh band from YK", },
+         { id: 2, name: "SAMSONS", bio: "New mind", },
+         { id: 3, name: "Perterpan", bio: "Bandung pride", },
+         { id: 4, name: "Repvblik", bio: "Cinta sempurna", },
+      ]
+   })
+
+   return artists;
 }
 
-export let artistsDummy: Artist[] = [
-   {
-      id: 1,
-      name: "Lady Lala",
-      bio: "I'm the number one",
-      image: "",
-      createdAt: "",
-      updatedAt: "",
-   },
-   {
-      id: 2,
-      name: "One Republic",
-      bio: "The greatest band",
-      image: "",
-      createdAt: "",
-      updatedAt: "",
-   },
-]
+export async function getArtists() {
+   const artists = await prisma.artist.findMany();
 
-export function getArtists() {
-   return artistsDummy;
+   return artists;
+}
+
+export async function getArtistsWithAlbums() {
+   const artists = await prisma.artist.findMany({
+      include: {
+         album: true
+      }
+   })
+
+   return artists;
 }
 
 export async function getArtistById(artistId: number) {
@@ -90,4 +88,10 @@ export async function deleteArtistById(id: number) {
    });
 
    return deletedArtist;
+}
+
+export async function deleteAllArtists() {
+   const deletedData = await prisma.artist.deleteMany();
+
+   return deletedData;
 }

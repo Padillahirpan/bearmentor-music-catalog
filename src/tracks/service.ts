@@ -1,104 +1,114 @@
-import { Album } from "../albums/service";
-import { Artist } from "../artists/service";
+import { PrismaClient } from "@prisma/client"
+import { NewTrackRequestSchema, TrackRequestSchema, validateTrack } from "./schema";
+import { z } from "zod";
 
-interface Track {
-   id: number,
-   title: string,
-   createdAt: string,
-   updatedAt: string,
-   album: Album,
-   artist: Artist,
+const prisma = new PrismaClient();
+
+export async function seedTracks() {
+   const artists = await prisma.track.createMany({
+      data: [
+        { id: 1, title: "Tertatih", album_id: 1},
+        { id: 2, title: "Kita", album_id: 1},
+        { id: 3, title: "J.A.P", album_id: 1},
+        { id: 4, title: "Anugrah Terindah Yang Pernah Kumiliki", album_id: 1},
+        { id: 5, title: "Pede", album_id: 1},
+        { id: 6, title: "Dan...", album_id: 1},
+        { id: 7, title: "Have Fun", album_id: 2},
+        { id: 8, title: "Pasti Ku Bisa", album_id: 2},
+        { id: 9, title: "Hujan Turun", album_id: 2},
+        { id: 10, title: "On The Phone", album_id: 2},
+        { id: 11, title: "Hari Bersamanya", album_id: 2},
+        { id: 12, title: "Kehadiranmu", album_id: 3},
+        { id: 13, title: "Yang T'lah Lalu", album_id: 3},
+        { id: 14, title: "Naluri Lelaki", album_id: 3},
+        { id: 15, title: "Cinta", album_id: 3},
+        { id: 16, title: "Dengan Nafasmu", album_id: 3},
+        { id: 17, title: "Menghapus Jejakmu", album_id: 4},
+        { id: 18, title: "Hari Yang Cerah Untuk Jiwa Yang Sepi", album_id: 4},
+        { id: 19, title: "Di Balik Awan", album_id: 4},
+        { id: 20, title: "Kota Mati", album_id: 4},
+        { id: 21, title: "Melawan Dunia", album_id: 4},
+        { id: 22, title: "Jika Aku Mati", album_id: 5},
+        { id: 23, title: "Tentangmu", album_id: 5},
+        { id: 24, title: "Hanya Ingin Kau Tahu", album_id: 5},
+        { id: 25, title: "Biarkan Ku Melihat Surga", album_id: 5},
+        { id: 26, title: "Kasih Dengarkanlah", album_id: 5},
+      ]
+   });
+
+  return artists;
 }
 
-export let tracksDummy: Track[] = [
-   {
-      id: 1,
-      title: "Dine In",
-      createdAt: "dinein@gmail.com",
-      updatedAt: "",
-      album: {
-         id: 1,
-         title: "Summer 245",
-         releaseDate: "08 January 2020",
-         coverArt: "",
-         createdAt: "08 January 2024",
-         updatedAt: "10 January 2024",
-         artist: {
-            id: 1,
-            name: "Lady Lala",
-            bio: "I'm the number one",
-            image: "",
-            createdAt: "",
-            updatedAt: ""
-         }
+export async function getTracksWithAlbums() {
+   const tracks = await prisma.track.findMany({
+      include: {
+         album: true,
       },
-      artist: {
-         id: 1,
-         name: "Lady Lala",
-         bio: "I'm the number one",
-         image: "",
-         createdAt: "",
-         updatedAt: ""
-      }
-   },
-   {
-      id: 2,
-      title: "Dine Out",
-      createdAt: "20 December 2021",
-      updatedAt: "21 December 2021",
-      album: {
-         id: 1,
-         title: "Summer 245",
-         releaseDate: "08 January 2020",
-         coverArt: "",
-         createdAt: "08 January 2024",
-         updatedAt: "10 January 2024",
-         artist: {
-            id: 1,
-            name: "Lady Lala",
-            bio: "I'm the number one",
-            image: "",
-            createdAt: "",
-            updatedAt: ""
-         }
-      },
-      artist: {
-         id: 1,
-         name: "Lady Lala",
-         bio: "I'm the number one",
-         image: "",
-         createdAt: "",
-         updatedAt: ""
-      }
-   },
-];
+   });
 
-export async function getTracks() {
-   return tracksDummy;
+   return tracks;
 }
 
 export async function getTrackById(id: number) {
-   const selectedTrack = tracksDummy.find((track) => {
-      return track.id === id;
+   const track = await prisma.track.findUnique({
+      where: {
+         id: id
+      }
    });
 
-   return selectedTrack;
+   return track;
 }
 
-export async function addNewTrack(track: Track) {
+export async function deleteAllTracks() {
+   const deletedData = await prisma.track.deleteMany()
 
+   return deletedData;
 }
 
-export async function updateNewTrack({ id, ...tracks }: Track) {
-   const index = tracksDummy.findIndex((track) => {
-      return track.id === id
+export async function deleteTrackById(id: number) {
+   const deletedTrack = await prisma.track.delete({
+      where: {
+         id: id,
+      },
    });
 
-   const doto = {...tracksDummy[index]};
+   return deletedTrack;
+}
 
-   console.log("this is data upate pertama: ",doto)
+export async function updateTrackById(
+   id: number, data: Partial<z.infer<typeof TrackRequestSchema>>
+) {
+   return await prisma.track.update({
+      where: {
+         id: id,
+      },
+      data: {
+         title: data.title,
+         album_id: data.album_id ? Number(data.album_id) : -1
+      }
+   })
+}
 
-   tracksDummy[index] = { ...tracksDummy[index], ...tracks}
+export async function addTrack(
+   data: Partial<z.infer<typeof NewTrackRequestSchema>>
+) {
 
-   return tracksDummy;
+   const validateData = validateTrack(data)
+   const newAlbum = await prisma.track.create({
+      data: {
+         title: validateData.title,
+         album_id: Number(validateData.album_id),
+      },
+   })
+   return newAlbum;
+}
+
+export async function isExists(id: number) {
+   const exists = await prisma.track.findFirst({
+     where: {
+      id: id,
+     },
+   })
+ 
+   return Boolean(exists)
 }

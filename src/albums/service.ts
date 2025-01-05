@@ -1,58 +1,93 @@
-import { Artist } from "../artists/service";
+import { z } from "zod";
+import { AlbumRequestSchema, NewAlbumRequestSchema, validateAlbum } from "./schema";
+import { PrismaClient } from "@prisma/client"
 
-export interface Album {
-   id: number,
-   title: string,
-   releaseDate: string,
-   coverArt: string,
-   createdAt: string,
-   updatedAt: string,
-   artist: Artist,
-}
+const prisma = new PrismaClient();
 
-export let albumsDummy: Album[] = [
-   {
-      id: 1,
-      title: "Summer 245",
-      releaseDate: "08 January 2001",
-      coverArt: "",
-      createdAt: "08 January 2024",
-      updatedAt: "10 January 2024",
-      artist: {
-         id: 1,
-         name: "Lady Lala",
-         bio: "I'm the number one",
-         image: "",
-         createdAt: "",
-         updatedAt: ""
-      }
-   },
-   {
-      id: 2,
-      title: "One for all",
-      coverArt: "",
-      releaseDate: "",
-      createdAt: "",
-      updatedAt: "",
-      artist: {
-         id: 1,
-         name: "Lady Lala",
-         bio: "I'm the number one",
-         image: "",
-         createdAt: "",
-         updatedAt: ""
-      }
-   },
-]
-
-export function getAlbums() {
-   return albumsDummy;
-}
-
-export function getAlbumById(id: number) {
-   const selectedAlbum = albumsDummy.find((album) => {
-      return album.id === id;
+export async function seedAlbums() {
+   const albums = await prisma.album.createMany({
+      data: [
+         { id: 1, title: "Sheila On 7", artist_id: 1},
+         { id: 2, title: "Berlayar", artist_id: 1},
+         { id: 3, title: "Naluri Lelaki(Special Edition)", artist_id: 2},
+         { id: 4, title: "Hari Yang Cerah", artist_id: 3},
+         { id: 5, title: "Punya Arti", artist_id: 4},
+      ]
    });
 
-   return selectedAlbum;
+   return albums;
+
+}
+
+export async function getAlbumsWithArtists() {
+   const artistsWithAlbums = await prisma.album.findMany({
+      include: {
+         artist: true
+      }
+   });
+
+   return artistsWithAlbums;
+}
+
+export async function getAlbumById(albumId: number) {
+   const artist = await prisma.album.findUnique({
+      where: {
+         id: albumId
+      }
+   });
+
+   return artist;
+}
+
+export async function addAlbum(
+   data: Partial<z.infer<typeof NewAlbumRequestSchema>>
+) {
+
+   const validateData = validateAlbum(data)
+   const newAlbum = await prisma.album.create({
+      data: {
+         title: validateData.title,
+         cover_art: validateData.cover_art,
+         artist_id: Number(validateData.artist_id),
+      },
+   })
+   return newAlbum;
+}
+
+export async function updateAlbumById(
+   id: number, data: Partial<z.infer<typeof AlbumRequestSchema>>
+) {
+   const validatedData = AlbumRequestSchema.parse(data);
+   return await prisma.album.update({
+      where: {
+         id: id
+      },
+      data: validatedData
+   })
+}
+
+export async function isExists(id: number) {
+   const exists = await prisma.album.findFirst({
+     where: {
+      id: id,
+     },
+   })
+ 
+   return Boolean(exists)
+}
+
+export async function deleteAlbumById(id: number) {
+   const deletedAlbum = await prisma.album.delete({
+      where: {
+         id: id
+      },
+   });
+
+   return deletedAlbum;
+}
+
+export async function deleteAllAlbums() {
+   const deletedData = await prisma.album.deleteMany();
+
+   return deletedData;
 }

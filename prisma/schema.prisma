@@ -20,7 +20,7 @@ model Artist {
   image      String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  Album      Album[]
+  album      Album[]
 
   @@map("artists")
 }
@@ -34,30 +34,30 @@ model Album {
   updated_at   DateTime  @updatedAt
   artist_id    Int
   artist       Artist    @relation(fields: [artist_id], references: [id])
-  Track        Track[]
+  track        Track[]
 
   @@map("albums")
 }
 
 model Track {
-  id            Int             @id @default(autoincrement())
-  title         String          @db.VarChar(100)
-  created_at    DateTime        @default(now())
-  updated_at    DateTime        @updatedAt
-  album_id      Int
-  album         Album           @relation(fields: [album_id], references: [id])
-  PlaylistTrack PlaylistTrack[]
+  id             Int             @id @default(autoincrement())
+  title          String          @db.VarChar(100)
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  album_id       Int
+  album          Album           @relation(fields: [album_id], references: [id])
+  playlist_track PlaylistTrack[]
 
   @@map("tracks")
 }
 
 model Playlist {
-  id            Int             @id @default(autoincrement()) // Auto-incrementing primary key
-  title         String          @db.VarChar(255) // Title of the playlist
-  createdAt     DateTime        @default(now()) // Timestamp for creation
-  updatedAt     DateTime        @updatedAt // Timestamp for last update
-  description   String?         @db.Text // Optional description
-  PlaylistTrack PlaylistTrack[]
+  id             Int             @id @default(autoincrement()) // Auto-incrementing primary key
+  title          String          @db.VarChar(255) // Title of the playlist
+  created_at     DateTime        @default(now()) // Timestamp for creation
+  updated_at     DateTime        @updatedAt // Timestamp for last update
+  description    String?         @db.Text // Optional description
+  playlist_track PlaylistTrack[]
 
   @@map("playlists")
 }
@@ -67,8 +67,8 @@ model PlaylistTrack {
   trackId     Int // Foreign key to Track
   name        String   @db.VarChar(255) // Name of the track in the playlist
   description String?  @db.Text // Optional description
-  createdAt   DateTime @default(now()) // Timestamp for creation
-  updatedAt   DateTime @updatedAt // Timestamp for last update
+  created_at  DateTime @default(now()) // Timestamp for creation
+  updated_at  DateTime @updatedAt // Timestamp for last update
 
   playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade) // Relation to Playlist
   track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade) // Relation to Track
