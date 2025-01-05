@@ -1,6 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import * as playlistService from './service';
-import { NewPlaylistRequestSchema, PlaylistIdSchema, PlaylistRequestSchema } from "./schema";
+import { NewPlaylistRequestSchema, NewPlaylistTrackRequestSchema, PlaylistIdSchema, PlaylistRequestSchema } from "./schema";
 
 const API_TAG = ['Playlists'];
 
@@ -57,7 +57,31 @@ export const playlistRoute = new OpenAPIHono()
             }, 200);
        },  
    )
-   // get all artists
+   // get Playlists With Tracks
+   .openapi(
+      {
+         method: 'get',
+         path: '/tracks',
+         description: 'Get all playlist with tracks',
+         responses: {
+           200: {
+             description: 'List of playlist and tracks',
+           },
+         },
+         tags: API_TAG,
+       },
+       async (c) => {
+         const playlists = await playlistService.getPlaylistsWithTracks();
+
+         return c.json(
+            {
+               status: "success",
+               message: "Successfully get playlist with track",
+               data: playlists,
+            }, 200);
+       },   
+   )
+   // get all playlist
    .openapi(
       {
          method: 'get',
@@ -110,7 +134,7 @@ export const playlistRoute = new OpenAPIHono()
             }, 200);
        },   
    )
-   // update album
+   // update playlist
    .openapi(
       {
          method: 'put',
@@ -221,4 +245,42 @@ export const playlistRoute = new OpenAPIHono()
                data: deletedPlaylist,
             }, 200);
        },   
+   )
+   // insert playlist and track
+   .openapi(
+      {
+         method: 'post',
+         path: '/playlisttrack/add',
+         description: 'Create a new playlist in the database',
+         request: {
+            body: {
+               content: {
+                  'application/json': {
+                     schema: NewPlaylistTrackRequestSchema,
+                  },
+               },
+            },
+         },
+         responses: {
+           201: {
+            description: 'Playlist track successfully added',
+           },
+           404: {
+            description: 'Link not found',
+           }
+         },
+         tags: API_TAG,
+      },
+      async (c) => {
+         const body = c.req.valid('json');
+         const newPlaylist = await playlistService.addPlaylistTrack(body);
+
+         return c.json(
+            {
+               status: "success",
+               message: "Successfully add the playlist track",
+               data: newPlaylist,
+            }, 200
+         );
+      },  
    )

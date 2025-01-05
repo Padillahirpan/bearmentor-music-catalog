@@ -23,7 +23,7 @@ export const albumRoute = new OpenAPIHono()
          return c.json(albums, 201);
       },
    )
-   // add new artist
+   // add new album
    .openapi(
       {
          method: 'post',
@@ -57,7 +57,7 @@ export const albumRoute = new OpenAPIHono()
             }, 200);
        },  
    )
-   // get all artists
+   // get all albums
    .openapi(
       {
          method: 'get',

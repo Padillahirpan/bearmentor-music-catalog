@@ -19,3 +19,20 @@ export const NewPlaylistRequestSchema = z
 export const validateNewPlaylist = (data: any) => {
    return NewPlaylistRequestSchema.parse(data);
 };
+
+export const QueryPlaylistSchema = z.object({
+  title: z.string().optional(),
+  sortBy: z.enum(['title', 'created_at', 'updated_at']).optional(),
+  sortOrder: z.enum(['asc', 'desc']),
+});
+
+export const NewPlaylistTrackRequestSchema = z
+  .object({
+    title: z.string().min(1),
+    description: z.string().optional(),
+    trackIds: z.array(z.coerce.number().min(1)),
+});
+
+export const validateNewPlaylistTrack = (data: any) => {
+  return NewPlaylistTrackRequestSchema.parse(data);
+};
