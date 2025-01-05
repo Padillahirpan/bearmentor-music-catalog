@@ -63,12 +63,10 @@ model Playlist {
 }
 
 model PlaylistTrack {
-  playlistId  Int // Foreign key to Playlist
-  trackId     Int // Foreign key to Track
-  name        String   @db.VarChar(255) // Name of the track in the playlist
-  description String?  @db.Text // Optional description
-  created_at  DateTime @default(now()) // Timestamp for creation
-  updated_at  DateTime @updatedAt // Timestamp for last update
+  playlistId Int // Foreign key to Playlist
+  trackId    Int // Foreign key to Track
+  created_at DateTime @default(now()) // Timestamp for creation
+  updated_at DateTime @updatedAt // Timestamp for last update
 
   playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade) // Relation to Playlist
   track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade) // Relation to Track
