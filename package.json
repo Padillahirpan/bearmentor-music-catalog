@@ -1,7 +1,9 @@
 {
   "name": "my-app",
   "scripts": {
-    "dev": "bun run --hot src/index.tsx"
+    "dev": "bun run --hot src/index.tsx",
+    "prestart": "bunx prisma migrate dev",
+    "start": "bun run src/index.tsx"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",
