@@ -2,7 +2,7 @@
   "name": "my-app",
   "scripts": {
     "dev": "bun run --hot src/index.tsx",
-    "prestart": "bunx prisma migrate dev",
+    "prestart": "bunx prisma migrate deploy",
     "start": "bun run src/index.tsx"
   },
   "dependencies": {
