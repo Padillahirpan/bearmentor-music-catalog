@@ -91,6 +91,9 @@ export const artistRoute = new OpenAPIHono()
          method: 'get',
          path: '/detail/{id}',
          description: 'Get artist by id',
+         request: {
+            params: ArtistIdSchema,
+         },
          responses: {
            200: {
              description: 'Data of artist',

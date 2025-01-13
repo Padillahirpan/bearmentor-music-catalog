@@ -56,6 +56,9 @@ export const trackRoute = new OpenAPIHono()
       method: 'get',
       path: '/detail/{id}',
       description: 'Get track by id',
+      request: {
+        params: TrackIdSchema,
+     },
       responses: {
         200: {
           description: 'Details of track',

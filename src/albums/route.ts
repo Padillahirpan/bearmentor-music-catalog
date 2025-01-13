@@ -86,7 +86,10 @@ export const albumRoute = new OpenAPIHono()
       {
          method: 'get',
          path: '/detail/{id}',
-         description: 'Get album by id',
+         description: 'Get album by id from the database',
+         request: {
+            params: AlbumIdSchema,
+         },
          responses: {
            200: {
              description: 'Data of album detail',

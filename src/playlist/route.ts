@@ -111,6 +111,9 @@ export const playlistRoute = new OpenAPIHono()
          method: 'get',
          path: '/detail/{id}',
          description: 'Get playlist by id',
+         request: {
+            params: PlaylistIdSchema,
+         },
          responses: {
            200: {
              description: 'Data of playlist detail',
