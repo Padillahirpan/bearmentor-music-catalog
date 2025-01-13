@@ -1,4 +1,4 @@
-# MusicHits2000 REST API
+# MusicHits2000s REST API
 
 MusicHits2000 is a RESTful API designed to manage a music library. It allows users to perform CRUD operations on artists, albums, playlists, and tracks. The API is built using Node.js with the Hono framework, and it uses PostgreSQL as the database, managed through Prisma ORM. The project is written in TypeScript to ensure type safety and maintainability.
 
@@ -9,6 +9,11 @@ MusicHits2000 is a RESTful API designed to manage a music library. It allows use
 - **Database**: PostgreSQL
 - **ORM**: Prisma
 - **Language**: TypeScript
+
+## URL
+
+You can access here :
+[MusicHits2000s](https://bearmentor-music-catalog.onrender.com/)
 
 ## List of API Endpoints
 
