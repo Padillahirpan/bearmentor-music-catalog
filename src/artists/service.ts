@@ -13,13 +13,33 @@ export async function seedArtists() {
          { id: 3, name: "Perterpan", bio: "Bandung pride", },
          { id: 4, name: "Repvblik", bio: "Cinta sempurna", },
       ]
-   })
+   });
 
    return artists;
 }
 
-export async function getArtists() {
-   const artists = await prisma.artist.findMany();
+export async function getArtists(search?: string) {
+   const artists = await prisma.artist.findMany({
+      where: search ? {
+         OR: [
+            {
+               name: {
+                  contains: search,
+                  mode: 'insensitive',
+               },
+            },
+            {
+               bio: {
+                  contains: search,
+                  mode: 'insensitive',
+               },
+            }
+         ],
+      } : {},
+      orderBy: {
+         id: 'asc',
+      },
+   });
 
    return artists;
 }

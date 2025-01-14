@@ -75,7 +75,10 @@ export const artistRoute = new OpenAPIHono()
          tags: API_TAG,
        },
        async (c) => {
-         const artists = await artistService.getArtists();
+         const search = c.req.query('search');
+         const artists = await artistService.getArtists(
+            search
+         );
 
          return c.json(
             {
