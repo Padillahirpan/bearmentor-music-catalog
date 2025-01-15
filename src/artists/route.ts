@@ -1,36 +1,18 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import * as artistService from './service'
 import { PrismaClient } from "@prisma/client"
-import { ArtistIdSchema, ArtistRequestSchema, NewArtistRequestSchema } from "./schema";
+import { ArtistIdSchema, ArtistRequestSchema, GetArtistsWithQuerySchema, NewArtistRequestSchema } from "./schema";
 
 const API_TAG = ['Artists']
 
 const prisma = new PrismaClient();
 
 export const artistRoute = new OpenAPIHono()
-   // seed artists
-   .openapi(
-      {
-         method: 'post',
-         path: 'seed',
-         description: 'Create a dummy artist in the database',
-         responses: {
-         201: {
-            description: 'Artist successfully added',
-         },
-         },
-         tags: API_TAG,
-      },
-      async (c) => {
-         const artists = await artistService.seedArtists();
-         return c.json(artists, 201);
-      },
-   )
    // add new artist
    .openapi(
       {
          method: 'post',
-         path: '/add',
+         path: '/',
          description: 'Create a new artist in the database',
          request: {
             body: {
@@ -49,7 +31,7 @@ export const artistRoute = new OpenAPIHono()
          tags: API_TAG,
        },
        async (c) => {
-         const body = c.req.valid('json')
+         const body = c.req.valid('json');
 
          const updatedArtist = await artistService.addArtist(body);
 
@@ -58,7 +40,7 @@ export const artistRoute = new OpenAPIHono()
                status: "success",
                message: "Successfully add the artist",
                data: updatedArtist,
-            }, 200);
+            }, 201);
        },  
    )
    // get all artists
@@ -67,6 +49,9 @@ export const artistRoute = new OpenAPIHono()
          method: 'get',
          path: '/',
          description: 'Get all artists',
+         request: {
+            query: GetArtistsWithQuerySchema,
+         },
          responses: {
            200: {
              description: 'List of artists',
@@ -76,8 +61,13 @@ export const artistRoute = new OpenAPIHono()
        },
        async (c) => {
          const search = c.req.query('search');
+         const withAlbum = c.req.query('withAlbum');
+         
+         const isWithAlbum = withAlbum === 'true' ? true : false;
+
          const artists = await artistService.getArtists(
-            search
+            search,
+            isWithAlbum,
          );
 
          return c.json(
@@ -92,7 +82,7 @@ export const artistRoute = new OpenAPIHono()
    .openapi(
       {
          method: 'get',
-         path: '/detail/{id}',
+         path: '/{id}',
          description: 'Get artist by id',
          request: {
             params: ArtistIdSchema,
@@ -120,39 +110,10 @@ export const artistRoute = new OpenAPIHono()
             }, 200);
        },   
    )
-   // get artist with albums
    .openapi(
       {
-         method: 'get',
-         path: '/albums',
-         description: 'Get artist with albums',
-         responses: {
-           200: {
-             description: 'Data of artist',
-           },
-         },
-         tags: API_TAG,
-       },
-       async (c) => {
-         const artists = await artistService.getArtistsWithAlbums();
-
-         if(!artists) {
-            return c.json({ message: 'Artists not found' }, 404);
-         }
-
-         return c.json(
-            {
-               status: "success",
-               message: "Successfully get artists",
-               data: artists,
-            }, 200);
-       },   
-   )
-   // update artist
-   .openapi(
-      {
-         method: 'put',
-         path: 'update/{id}',
+         method: 'patch',
+         path: '/{id}',
          description: 'Update artist by id',
          request: {
             params: ArtistIdSchema,
@@ -184,7 +145,9 @@ export const artistRoute = new OpenAPIHono()
             return c.json({ message: 'Artist not found' }, 404);
          }
 
-         const updatedArtist = artistService.updateArtistById(artistId, body);
+         await artistService.updateArtistById(artistId, body);
+
+         const updatedArtist = await artistService.getArtistById(artistId);
 
          return c.json(
             {
@@ -198,7 +161,7 @@ export const artistRoute = new OpenAPIHono()
    .openapi(
       {
          method: 'delete',
-         path: 'delete/{id}',
+         path: '/{id}',
          description: 'Delete artist by id',
          request: {
             params: ArtistIdSchema,
@@ -227,36 +190,8 @@ export const artistRoute = new OpenAPIHono()
          return c.json(
             {
                status: "success",
-               message: "Successfully delete artist",
-               data: deletedArtist,
-            }, 200);
-       },   
-   )
-   // delete all artists
-   .openapi(
-      {
-         method: 'delete',
-         path: 'delete-all',
-         description: 'Delete all artists',         
-         responses: {
-           200: {
-             description: 'All artist deleted',
-           },
-           404: {
-            description: 'Artist failure to delete',
-           },
-         },
-         tags: API_TAG,
-       },
-       async (c) => {
-
-         const deletedArtists = await artistService.deleteAllArtists();
-
-         return c.json(
-            {
-               status: "success",
-               message: "Successfully delete all artists",
-               data: deletedArtists,
+               message: "Successfully delete artist with id " + artistId,
+               data: true,
             }, 200);
        },   
    )

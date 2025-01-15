@@ -18,8 +18,14 @@ export async function seedArtists() {
    return artists;
 }
 
-export async function getArtists(search?: string) {
+export async function getArtists(
+   search?: string,
+   isAlbumIncluded?: boolean,
+) {
    const artists = await prisma.artist.findMany({
+      include: isAlbumIncluded ? {
+         album: true
+      } : {},
       where: search ? {
          OR: [
             {
@@ -28,12 +34,6 @@ export async function getArtists(search?: string) {
                   mode: 'insensitive',
                },
             },
-            {
-               bio: {
-                  contains: search,
-                  mode: 'insensitive',
-               },
-            }
          ],
       } : {},
       orderBy: {
