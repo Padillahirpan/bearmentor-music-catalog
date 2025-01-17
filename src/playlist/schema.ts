@@ -36,3 +36,10 @@ export const NewPlaylistTrackRequestSchema = z
 export const validateNewPlaylistTrack = (data: any) => {
   return NewPlaylistTrackRequestSchema.parse(data);
 };
+
+export const GetPlaylistWithQuerySchema = z.object({
+  search: z.string().optional(),
+  withTracks: z.coerce.boolean().optional(),
+  sortBy: z.enum(['title', 'created_at', 'updated_at']).optional(),
+  sortOrder: z.enum(['asc', 'desc']),
+});

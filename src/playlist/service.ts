@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { NewPlaylistRequestSchema, NewPlaylistTrackRequestSchema, PlaylistRequestSchema, QueryPlaylistSchema, validateNewPlaylist, validateNewPlaylistTrack } from "./schema";
+import { NewPlaylistRequestSchema, NewPlaylistTrackRequestSchema, PlaylistRequestSchema, validateNewPlaylist, validateNewPlaylistTrack } from "./schema";
 import { z } from "zod";
 
 const prisma = new PrismaClient();
@@ -84,14 +84,41 @@ export async function isExists(id: number) {
    return Boolean(exists)
 }
 
-export async function getPlaylistsWithTracks(query?: z.infer<typeof QueryPlaylistSchema>) {
+export async function getPlaylistsWithTracks(
+   search?: string,
+   withTracks?: boolean,
+   sortBy?: string,
+   sortOrder?: string 
+) {
+
+   // Define the include object for related tracks
+   const includeTracks = withTracks ? true : false;
+
+   // Fetch playlists from the database
    const playlists = await prisma.playlist.findMany({
       include: {
-         playlist_track: {
+         playlist_track: { 
             include: {
-               track: true,
-            },
+               track: includeTracks,
+            } 
          },
+      },
+      where: search ? {
+         OR: [
+            {
+               title: {
+                  contains: search,
+                  mode: 'insensitive',
+               },
+            },
+         ],
+      }: {},
+      orderBy: sortBy
+      ? {
+           [sortBy]: sortOrder || 'asc',
+      }
+      : {
+         id: 'asc',
       },
    });
 
@@ -101,12 +128,14 @@ export async function getPlaylistsWithTracks(query?: z.infer<typeof QueryPlaylis
       description: playlist.description,
       created_at: playlist.created_at,
       updated_at: playlist.updated_at,
-      tracks: playlist.playlist_track.map(pt => ({
-        id: pt.track.id,
-        title: pt.track.title,
-        created_at: pt.track.created_at,
-        updated_at: pt.track.updated_at,
-      })),
+      ...withTracks && {
+         tracks: playlist.playlist_track.map(pt => ({
+            id: pt.track.id,
+            title: pt.track.title,
+            created_at: pt.track.created_at,
+            updated_at: pt.track.updated_at,
+         })),
+      },
    }))
 
    return formattedPlaylists;
@@ -127,7 +156,7 @@ export async function addPlaylistTrack(
 
    const playlistId = newPlaylist.id;
 
-   const newPlaylistTracks = await Promise.all(
+   await Promise.all(
       validateData.trackIds.map(trackId => 
          prisma.playlistTrack.create({
             data: {
@@ -138,5 +167,5 @@ export async function addPlaylistTrack(
       )
    );
 
-   return newPlaylistTracks;
+   return playlistId;
 }
