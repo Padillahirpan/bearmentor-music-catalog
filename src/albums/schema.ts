@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { number, z } from 'zod'
 
 export const NewAlbumRequestSchema = z
   .object({
@@ -13,8 +13,9 @@ export const validateAlbum = (data: any) => {
 
 export const AlbumRequestSchema = z
   .object({
-    title: z.string().min(1),
+    title: z.string().optional(),
     cover_art: z.string().optional(),
+    artist_id: z.coerce.number().optional(),
 })
 
 export const AlbumIdSchema = z.object({

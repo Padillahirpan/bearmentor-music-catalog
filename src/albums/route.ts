@@ -5,29 +5,11 @@ import { AlbumIdSchema, AlbumRequestSchema, NewAlbumRequestSchema } from "./sche
 const API_TAG = ['Albums']
 
 export const albumRoute = new OpenAPIHono()
-   // seed albums
-   .openapi(
-      {
-         method: 'post',
-         path: 'seed',
-         description: 'Create a dummy album in the database',
-         responses: {
-            201: {
-               description: 'Album successfully added',
-            },
-         },
-         tags: API_TAG,
-      },
-      async (c) => {
-         const albums = albumService.seedAlbums()
-         return c.json(albums, 201);
-      },
-   )
    // add new album
    .openapi(
       {
          method: 'post',
-         path: '/add',
+         path: '/',
          description: 'Create a new album in the database',
          request: {
             body: {
@@ -54,7 +36,7 @@ export const albumRoute = new OpenAPIHono()
                status: "success",
                message: "Successfully add the album",
                data: updatedArtist,
-            }, 200);
+            }, 201);
        },  
    )
    // get all albums
@@ -85,7 +67,7 @@ export const albumRoute = new OpenAPIHono()
    .openapi(
       {
          method: 'get',
-         path: '/detail/{id}',
+         path: '/{id}',
          description: 'Get album by id from the database',
          request: {
             params: AlbumIdSchema,
@@ -116,8 +98,8 @@ export const albumRoute = new OpenAPIHono()
    // update album
    .openapi(
       {
-         method: 'put',
-         path: 'update/{id}',
+         method: 'patch',
+         path: '/{id}',
          description: 'Update album by id',
          request: {
             params: AlbumIdSchema,
@@ -149,7 +131,9 @@ export const albumRoute = new OpenAPIHono()
             return c.json({ message: 'Album not found' }, 404);
          }
 
-         const updatedAlbum = albumService.updateAlbumById(albumId, body);
+         await albumService.updateAlbumById(albumId, body);
+
+         const updatedAlbum = await albumService.getAlbumById(albumId);
 
          return c.json(
             {
@@ -194,34 +178,6 @@ export const albumRoute = new OpenAPIHono()
                status: "success",
                message: "Successfully delete album",
                data: deletedAlbum,
-            }, 200);
-       },   
-   )
-   // delete all albums
-   .openapi(
-      {
-         method: 'delete',
-         path: 'delete-all',
-         description: 'Delete all albums',
-         responses: {
-           200: {
-             description: 'All albums deleted',
-           },
-           404: {
-            description: 'Albums failure to delete',
-           },
-         },
-         tags: API_TAG,
-       },
-       async (c) => {
-
-         const deletedAlbums = await albumService.deleteAllAlbums();
-
-         return c.json(
-            {
-               status: "success",
-               message: "Successfully delete all albums",
-               data: deletedAlbums,
             }, 200);
        },   
    )

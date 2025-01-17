@@ -58,12 +58,29 @@ export async function updateAlbumById(
    id: number, data: Partial<z.infer<typeof AlbumRequestSchema>>
 ) {
    const validatedData = AlbumRequestSchema.parse(data);
+
+   if (validatedData.artist_id) {
+      const isArtistExists = await prisma.artist.findUnique({
+         where: {
+            id: Number(validatedData.artist_id),
+         },
+      });
+
+      if (!isArtistExists) {
+         throw new Error("Artist not found")
+      }
+   }
+
    return await prisma.album.update({
       where: {
          id: id
       },
-      data: validatedData
-   })
+      data: {
+         title: validatedData.title,
+         cover_art: validatedData.cover_art,
+         artist_id: Number(validatedData.artist_id),
+      }
+   });
 }
 
 export async function isExists(id: number) {
